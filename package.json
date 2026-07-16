@@ -1,0 +1,28 @@
+{
+  "name": "shop-tycoon-console",
+  "productName": "Shop Tycoon Console",
+  "version": "0.1.0",
+  "description": "Unified multi-marketplace selling console with local AI assistant and gamification for a solo woodworking business.",
+  "main": "src/main/main.js",
+  "author": "Tristin Gatien",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "check": "node scripts/check.js",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "build": {
+    "appId": "com.tristin.shoptycoon",
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

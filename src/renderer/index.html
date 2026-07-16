@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file:;" />
+  <title>Shop Tycoon Console</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🪵</div>
+        <div class="brand-text">
+          <div class="brand-name">Shop Tycoon</div>
+          <div class="brand-sub" id="brand-level">—</div>
+        </div>
+      </div>
+      <div class="points-chip" id="points-chip" title="Total points">
+        <span class="points-star">★</span><span id="points-total">0</span>
+      </div>
+      <div id="nav-items"></div>
+      <div class="sidebar-footer">
+        <div id="sync-status" class="sync-status">idle</div>
+      </div>
+    </nav>
+    <main id="view"></main>
+  </div>
+  <div id="toast-holder"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
