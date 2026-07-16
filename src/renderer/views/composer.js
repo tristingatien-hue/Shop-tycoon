@@ -14,7 +14,7 @@ export async function render(el) {
       </div>
       <button id="btn-new-product" class="primary small">+ New product</button>
     </div>
-    <div class="grid" style="grid-template-columns: 300px 1fr; align-items:start">
+    <div class="grid composer-layout" style="align-items:start">
       <div class="panel" id="product-list"></div>
       <div id="product-detail"></div>
     </div>

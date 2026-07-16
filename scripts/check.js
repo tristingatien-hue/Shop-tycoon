@@ -238,6 +238,52 @@ async function main() {
   ok('coach cites the numbers, reasoning stripped', coach.advice.includes('$345') && !coach.advice.includes('<think>'));
   ok('approvals badge counts pending', (await rpc.dispatch('app.badges', {})).result.approvals === 0);
 
+  console.log('\nStage 7: mobile companion (LAN server)');
+  const mobile = require('../src/main/mobile-server');
+  ok('mobile companion is off by default', config.DEFAULTS.mobile.enabled === false);
+
+  config.save({ mobile: { enabled: true, port: 0 } }); // port 0 = ephemeral, test-safe
+  const mst = await mobile.start();
+  ok('server starts and generates a 6-digit PIN', mst.running && /^\d{6}$/.test(mst.pin));
+  const base = `http://127.0.0.1:${mst.port}`;
+
+  const unauthPage = await fetch(base + '/', { redirect: 'manual' });
+  ok('unpaired phone is redirected to the pairing page', unauthPage.status === 302 && unauthPage.headers.get('location') === '/pair');
+  const unauthRpc = await fetch(base + '/rpc', { method: 'POST', body: JSON.stringify({ method: 'app.badges' }) });
+  ok('unpaired phone cannot reach rpc', unauthRpc.status === 401);
+
+  const wrongPin = mobile.status().pin === '000000' ? '111111' : '000000';
+  const badPair = await fetch(base + '/pair', { method: 'POST', body: JSON.stringify({ pin: wrongPin }) });
+  ok('wrong PIN is rejected', badPair.status === 401);
+  const goodPair = await fetch(base + '/pair', { method: 'POST', body: JSON.stringify({ pin: mobile.status().pin }) });
+  const cookie = (goodPair.headers.get('set-cookie') || '').split(';')[0];
+  ok('correct PIN pairs and sets an HttpOnly session cookie', goodPair.status === 200
+    && cookie.startsWith('shop_mobile_session=') && /httponly/i.test(goodPair.headers.get('set-cookie')));
+
+  const phoneBadges = await (await fetch(base + '/rpc', {
+    method: 'POST', headers: { cookie }, body: JSON.stringify({ method: 'app.badges' })
+  })).json();
+  ok('paired phone reaches the same rpc as the desktop', phoneBadges.result && typeof phoneBadges.result.points === 'number');
+
+  const appPage = await (await fetch(base + '/', { headers: { cookie } })).text();
+  ok('paired phone gets the console UI with the browser shim', appPage.includes('Shop Tycoon') && appPage.includes('web-api.js'));
+  const traversal = await fetch(base + '/..%2f..%2fpackage.json', { headers: { cookie } });
+  ok('path traversal is blocked', traversal.status === 404 || traversal.status === 403);
+
+  const sseAbort = new AbortController();
+  const sse = await fetch(base + '/events', { headers: { cookie }, signal: sseAbort.signal });
+  const sseReader = sse.body.getReader();
+  await sseReader.read(); // ": connected" comment
+  mobile.broadcast({ type: 'points', points: 42, reason: 'mobile test' });
+  const sseChunk = new TextDecoder().decode((await sseReader.read()).value);
+  ok('live events stream to the phone over SSE', sseChunk.includes('"points":42'));
+  sseAbort.abort();
+
+  ok('mobile.status rpc reports paired device', (await rpc.dispatch('mobile.status', {})).result.devices.length === 1);
+  mobile.stop();
+  ok('stopping the server signs every phone out', mobile.status().running === false && mobile.status().devices.length === 0);
+  config.save({ mobile: { enabled: false } });
+
   console.log(`\n${passed} checks passed${process.exitCode ? ' (WITH FAILURES)' : ''}`);
   require('../src/main/db').close();
   fs.rmSync(process.env.SHOP_DATA_DIR, { recursive: true, force: true });

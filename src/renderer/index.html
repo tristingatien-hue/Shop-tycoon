@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file:;" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1d1915" />
   <title>Shop Tycoon Console</title>
+  <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -27,6 +31,8 @@
     <main id="view"></main>
   </div>
   <div id="toast-holder"></div>
+  <!-- Inert on desktop (preload provides window.api first); powers the mobile companion in a phone browser. -->
+  <script src="web-api.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

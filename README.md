@@ -6,7 +6,7 @@ and makes running the shop feel like playing a tycoon game. Everything runs
 locally: local database, local config, and (in stage 6) a local AI model.
 **No paid cloud services required to function.**
 
-## What's built and working (stages 1–6)
+## What's built and working (stages 1–7)
 
 | Screen | What it does |
 |---|---|
@@ -16,7 +16,8 @@ locally: local database, local config, and (in stage 6) a local AI model.
 | 🪚 **Products & Listings** | Enter a product once; per-channel editable templates render it for eBay / Amazon / Walmart / Facebook with real character limits and live preview; publish or export |
 | 📦 **Orders** | One pipeline across channels: new → packed → shipped → done, ship-by warnings, manual entry for Facebook sales, material cost per order |
 | 🔌 **Channels** | Connect eBay via OAuth, health indicators, eBay listing setup helper, honest "not yet connected" stubs for Amazon/Walmart |
-| ⚙️ **Settings** | Tune every point value, target, and budget; pick your local AI backend |
+| ⚙️ **Settings** | Tune every point value, target, and budget; pick your local AI backend; turn the mobile companion on/off |
+| 📱 **Mobile companion** | The whole console in your phone's browser over your own Wi-Fi — PIN-paired, LAN only, nothing in the cloud. "Add to Home Screen" makes it feel like an app |
 
 ## Channel reality check (read before connecting)
 
@@ -59,8 +60,9 @@ backed up the business.
 npm run check
 ```
 
-runs 54 self-tests over the database, adapters, templates, inbox, orders, and
-game engine without touching your real data.
+runs 80 self-tests over the database, adapters, templates, inbox, orders,
+game engine, AI guardrails, and mobile companion without touching your real
+data.
 
 ## Security posture
 
@@ -70,6 +72,13 @@ game engine without touching your real data.
   external links open in your browser, never inside the app.
 - No telemetry. Nothing leaves your PC except calls to marketplaces you
   connected.
+- The mobile companion is **off by default**. When on, it serves only your
+  local network: a phone must enter the 6-digit PIN shown on the desktop
+  (5 wrong guesses rotates the PIN and locks pairing for a minute), sessions
+  are random tokens in an HttpOnly cookie held in memory only, and restarting
+  the app signs every phone out. Phones go through the exact same RPC layer
+  as the desktop window, so every guardrail (approval queue, manual-only
+  Facebook) applies unchanged.
 
 ## The game (and why it can't be cheated)
 
@@ -102,9 +111,17 @@ queue — the send action is your click, drafts are grounded in the product
 facts you entered, price suggestions are pure math off your cost and target
 margin, and manual channels (Facebook) can only ever export text.
 
+## Using it from your phone (stage 7)
+
+In the app: **Settings → 📱 Mobile companion → On → Apply**. The panel shows
+the address to open in your phone's browser and a 6-digit pairing PIN. Phone
+and PC must be on the same Wi-Fi. After pairing once, use your browser's
+**Add to Home Screen** to get a full-screen, app-like icon. Live updates
+(new messages, points, orders) stream to the phone in real time.
+
 ## Roadmap
 
-7. **Amazon SP-API adapter**, then **Walmart**, then seasonal polish and an
+8. **Amazon SP-API adapter**, then **Walmart**, then seasonal polish and an
    optional auto-send-for-FAQs toggle (off by default).
 
 ## Project layout

@@ -65,6 +65,13 @@ async function drawThreads() {
   }
 }
 
+// On phones the list and the conversation share the screen: opening a thread
+// slides the conversation in (CSS .show-msgs); Back returns to the list.
+function showPane(show) {
+  const layout = document.querySelector('.inbox-layout');
+  if (layout) layout.classList.toggle('show-msgs', show);
+}
+
 async function openThread(threadId) {
   currentThread = threadId;
   const pane = document.getElementById('msg-pane');
@@ -72,11 +79,13 @@ async function openThread(threadId) {
   await call('inbox.markRead', { threadId });
   refreshBadges();
   drawThreads();
+  showPane(true);
 
   const isManual = thread.channel_kind === 'manual';
   pane.innerHTML = '';
   pane.appendChild(h(`<div class="row spread" style="padding-bottom:10px;border-bottom:1px solid var(--border)">
     <div>
+      <button class="small mobile-back" data-back>‹ Back</button>
       <b>${esc(thread.counterpart)}</b> <span class="pill ${isManual ? 'blue' : 'amber'}">${esc(thread.channel_name)}</span>
       ${thread.listing_ref ? `<span class="muted small-text"> · listing ${esc(thread.listing_ref)}</span>` : ''}
       <div class="muted small-text">${esc(thread.subject || '')}</div>
@@ -116,6 +125,7 @@ async function openThread(threadId) {
   };
   pane.appendChild(composer);
 
+  pane.querySelector('[data-back]').onclick = () => { currentThread = null; showPane(false); drawThreads(); };
   pane.querySelector('[data-resolve]').onclick = async () => {
     await call('inbox.resolve', { threadId });
     toast('Thread resolved', 'Nice — resolved threads score points once the game engine is on.');
@@ -131,7 +141,9 @@ async function openThread(threadId) {
 function manualThreadDialog(el) {
   const pane = document.getElementById('msg-pane');
   pane.innerHTML = '';
+  showPane(true);
   const form = h(`<div>
+    <button class="small mobile-back" data-back style="margin-bottom:8px">‹ Back</button>
     <h2 style="margin-bottom:10px">Log a Facebook conversation</h2>
     <p class="muted small-text" style="margin-bottom:12px">Paste what the buyer sent you on Messenger. It becomes a normal inbox thread: you get reply drafting, tracking, and points, and your replies are copied back out to paste.</p>
     <label class="field"><span class="lbl">Buyer name</span><input data-k="counterpart"></label>
@@ -146,5 +158,6 @@ function manualThreadDialog(el) {
     await drawThreads();
     openThread(res.threadId);
   };
+  form.querySelector('[data-back]').onclick = () => showPane(false);
   pane.appendChild(form);
 }

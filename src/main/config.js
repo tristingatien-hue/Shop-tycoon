@@ -27,6 +27,14 @@ const DEFAULTS = {
   // How often connected channels are polled for new messages/orders (minutes).
   syncIntervalMinutes: 10,
 
+  // Mobile companion: serves this same console to your phone's browser over
+  // your own Wi-Fi (PIN-paired, LAN only, nothing in the cloud). Off until
+  // you enable it in Settings.
+  mobile: {
+    enabled: false,
+    port: 8425
+  },
+
   game: {
     // Points for real business wins. Tune freely.
     points: {

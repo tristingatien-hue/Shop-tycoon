@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'" />
+  <title>Pair with Shop Tycoon</title>
+  <style>
+    :root { --bg:#14110e; --panel:#1d1915; --border:#3a3128; --text:#ece4d8; --dim:#a89b8a; --accent:#e8a33d; --red:#e06c5a; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--text);
+           min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:28px 24px; width:100%; max-width:360px; text-align:center; }
+    .logo { font-size:44px; margin-bottom:8px; }
+    h1 { font-size:18px; margin-bottom:6px; }
+    p { color:var(--dim); font-size:13px; margin-bottom:20px; line-height:1.5; }
+    input { width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:10px;
+            padding:14px; font-size:28px; text-align:center; letter-spacing:10px; font-variant-numeric:tabular-nums; }
+    input:focus { outline:none; border-color:var(--accent); }
+    button { width:100%; margin-top:14px; background:var(--accent); border:none; color:#1a1408; font-weight:700;
+             font-size:15px; padding:13px; border-radius:10px; cursor:pointer; }
+    button:disabled { opacity:.5; }
+    .err { color:var(--red); font-size:13px; margin-top:12px; min-height:18px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🪵</div>
+    <h1>Shop Tycoon — Mobile</h1>
+    <p>On your PC, open <b>Settings → 📱 Mobile companion</b> and type the 6-digit PIN shown there.</p>
+    <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" autofocus />
+    <button id="go">Pair this phone</button>
+    <div class="err" id="err"></div>
+  </div>
+  <script src="pair.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "Shop Tycoon Console",
+  "short_name": "Shop Tycoon",
+  "description": "Your woodworking shop's selling console, on your phone over your own Wi-Fi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14110e",
+  "theme_color": "#1d1915",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

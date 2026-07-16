@@ -49,6 +49,8 @@ export async function render(el) {
       <span class="small-text muted" id="test-ai-result"></span>
     </div>
 
+    <div class="panel" id="mobile-panel"><h2>📱 Mobile companion</h2></div>
+
     <div class="panel"><h2>🎇 Seasons &amp; challenges</h2>
       <p class="muted small-text">Daily/weekly challenges and seasonal arcs (like the Christmas Market) are defined in
       <span class="mono">config.json → game.challenges</span>. Edit that file to add your own — each season needs an id,
@@ -63,6 +65,8 @@ export async function render(el) {
     if (typeof val !== 'number') continue;
     pg.appendChild(h(`<label class="field"><span class="lbl">${esc(key)}</span><input data-p="${key}" type="number" value="${val}"></label>`));
   }
+
+  await drawMobilePanel(el.querySelector('#mobile-panel'));
 
   el.querySelector('#test-ai').onclick = async () => {
     const out = el.querySelector('#test-ai-result');
@@ -85,5 +89,64 @@ export async function render(el) {
     });
     await call('config.save', partial);
     toast('Saved', 'Settings updated. Sync interval applies on next launch.');
+  };
+}
+
+// The mobile companion serves this same console to your phone's browser over
+// your own Wi-Fi — LAN only, PIN-paired, nothing in the cloud. The panel
+// redraws itself after every action so the URL/PIN shown is always live.
+async function drawMobilePanel(panel) {
+  const s = await call('mobile.status');
+  panel.innerHTML = '<h2>📱 Mobile companion</h2>';
+
+  panel.appendChild(h(`<div>
+    <p class="muted small-text" style="margin-bottom:10px">Use the whole console from your phone's browser while you're in the
+    workshop. Works only on your own Wi-Fi — nothing goes through the cloud. Your phone must enter the PIN below once;
+    restarting the app signs every phone out.</p>
+    <div class="row wrap" style="margin-bottom:10px">
+      <label class="field" style="margin-bottom:0"><span class="lbl">Companion</span><select data-m="enabled">
+        <option value="false" ${s.enabled ? '' : 'selected'}>Off</option>
+        <option value="true" ${s.enabled ? 'selected' : ''}>On</option>
+      </select></label>
+      <label class="field" style="margin-bottom:0;max-width:120px"><span class="lbl">Port</span><input data-m="port" type="number" value="${s.port}"></label>
+      <button class="small" data-apply style="align-self:flex-end">Apply</button>
+    </div>
+    ${s.running ? `
+      <hr class="sep">
+      <div class="grid cols-2">
+        <div>
+          <div class="stat-label">Open on your phone</div>
+          ${s.urls.length
+            ? s.urls.map(u => `<div class="mono" style="font-size:15px;padding:2px 0">${esc(u)}</div>`).join('')
+            : '<div class="muted small-text">No Wi-Fi/LAN address found — is this PC on the network?</div>'}
+          <div class="muted small-text" style="margin-top:6px">Phone and PC must be on the same Wi-Fi. In your phone's browser menu, "Add to Home Screen" makes it feel like an app.</div>
+        </div>
+        <div>
+          <div class="stat-label">Pairing PIN</div>
+          <div class="pin-display">${esc(s.pin)}</div>
+          <div class="muted small-text">${s.devices.length} device${s.devices.length === 1 ? '' : 's'} paired</div>
+          <div class="row" style="margin-top:8px">
+            <button class="small" data-newpin>New PIN</button>
+            <button class="small danger" data-disconnect>Sign out all phones</button>
+          </div>
+        </div>
+      </div>` : (s.enabled ? '<div class="warn-box">Enabled but not running — the port may be in use. Try another port and Apply.</div>' : '')}
+  </div>`));
+
+  panel.querySelector('[data-apply]').onclick = async () => {
+    await call('mobile.set', {
+      enabled: panel.querySelector('[data-m=enabled]').value === 'true',
+      port: Number(panel.querySelector('[data-m=port]').value)
+    });
+    await drawMobilePanel(panel);
+    toast('Mobile companion', 'Setting applied.');
+  };
+  const newpin = panel.querySelector('[data-newpin]');
+  if (newpin) newpin.onclick = async () => { await call('mobile.newPin'); await drawMobilePanel(panel); };
+  const disc = panel.querySelector('[data-disconnect]');
+  if (disc) disc.onclick = async () => {
+    await call('mobile.disconnectAll');
+    await drawMobilePanel(panel);
+    toast('Mobile companion', 'All phones signed out — they\'ll need the PIN again.');
   };
 }

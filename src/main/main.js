@@ -32,6 +32,8 @@ function createWindow() {
 
 function broadcast(payload) {
   if (win && !win.isDestroyed()) win.webContents.send('app-event', payload);
+  // Paired phones get the same live events over SSE.
+  try { require('./mobile-server').broadcast(payload); } catch { /* not loaded yet */ }
 }
 
 function loadFeatureModules(broadcastFn) {
@@ -44,7 +46,8 @@ function loadFeatureModules(broadcastFn) {
     ['./core/orders'],
     ['./ai/assistant'],
     ['./core/game', (m) => m.init({ broadcast: broadcastFn })],
-    ['./core/sync', (m) => m.start({ broadcast: broadcastFn })]
+    ['./core/sync', (m) => m.start({ broadcast: broadcastFn })],
+    ['./mobile-server', (m) => m.init()]
   ];
   for (const [name, setup] of modules) {
     let mod;
