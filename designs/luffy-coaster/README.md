@@ -10,9 +10,9 @@ so the recessed pockets can take diamond-art drills.
 | Diameter | 100 mm |
 | Base (floor) | 3.0 mm |
 | Raised outlines/rim | +2.0 mm (5.0 mm total) |
-| Outline wall width | ~1.0 mm (0.8 mm min) |
+| Outline wall width | ~1.2–1.4 mm |
 | Rim width | 3.0 mm |
-| Smallest pocket | 3.5 mm (anything under 3.0 mm is filled solid) |
+| Smallest pocket | 3.3 mm (thinner details are drawn as single lines) |
 
 Pocket depth (2 mm) fits standard 2.5–2.8 mm round or square drills on a
 thin layer of glue or double-sided tape, with the walls sitting flush.
