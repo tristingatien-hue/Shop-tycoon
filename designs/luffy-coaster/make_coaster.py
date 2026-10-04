@@ -124,8 +124,8 @@ def colour_regions(img, fig):
     hair = (np.maximum(np.maximum(B, G), Rc) < 75) & ~red
     hair_m = cv2.morphologyEx(hair.astype(np.uint8) * 255, cv2.MORPH_OPEN, k(mm(0.8)))
     z[(hair_m > 0) & inf & (np.arange(N)[:, None] < N * 0.62)] = HAIR
-    button = (hh > 15) & (hh < 35) & (ss > 170) & (vv > 90)
-    z[button & inf & (np.arange(N)[:, None] > N * 0.8)] = BUTTON
+    button = (hh > 14) & (hh < 36) & (ss > 140) & (vv > 90)
+    z[button & inf & (np.arange(N)[:, None] > N * 0.75)] = BUTTON
 
     # majority filter, then fold specks into their surroundings
     stack = np.stack([cv2.blur((z == i).astype(np.float32), (mm(1.5),) * 2) for i in range(6)])
@@ -154,6 +154,12 @@ def art_lines(img, fig):
     ink[~np.isin(regions, [SKIN, TEETH])] = 0
     ink[cv2.dilate((~np.isin(regions, [SKIN, TEETH])).astype(np.uint8), k(mm(1.5))) > 0] = 0
     lines = ink
+
+    # Hoodie drawstrings: thin bright strokes across the red shirt
+    strings = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, k(mm(3)))
+    strings = ((strings > 45) & (regions == SHIRT) & (inside > 0)).astype(np.uint8) * 255
+    strings = cv2.morphologyEx(strings, cv2.MORPH_OPEN, k(3))
+    lines |= strings * keep_blobs(strings, 2.0)
 
     # Zone borders (hat/hair/skin/teeth/shirt/buttons) incl. the silhouette,
     # since the region map is -1 outside the figure
@@ -185,21 +191,20 @@ def prune(sk, min_len):
 
 
 def speed_lines(fig):
-    """Horizontal speed lines on the open sky, like the Gear 5 coaster."""
+    """Staggered horizontal speed lines in the open sky on the left,
+    like the Gear 5 coaster."""
     m = np.zeros((N, N), np.uint8)
     rng = np.random.default_rng(7)
-    ys = np.linspace(R - 0.70 * R, R + 0.70 * R, 8)
-    for y in ys:
-        left = R - np.sqrt(max(R ** 2 - (y - R) ** 2, 0)) + mm(RIM_W)
-        length = mm(rng.uniform(12, 22))
-        x1 = int(left + mm(rng.uniform(1, 6)))
-        cv2.line(m, (x1, int(y)), (x1 + length, int(y)), 255, mm(WALL_W * 1.2))
-        # mirror on the right side
-        right = R + np.sqrt(max(R ** 2 - (y - R) ** 2, 0)) - mm(RIM_W)
-        x2 = int(right - mm(rng.uniform(1, 6)))
-        cv2.line(m, (x2 - length, int(y)), (x2, int(y)), 255, mm(WALL_W * 1.2))
-    # keep a clear gap between speed lines and the figure
-    m[cv2.dilate(fig, k(mm(4))) > 0] = 0
+    clear = cv2.dilate(fig, k(mm(5)))
+    for y in np.linspace(R - 0.62 * R, R + 0.62 * R, 7).astype(int):
+        left = int(R - np.sqrt(max(R ** 2 - (y - R) ** 2, 0)) + mm(RIM_W))
+        x1 = left + mm(rng.uniform(2, 7))
+        # run right until just short of the figure
+        row = np.nonzero(clear[y, x1:])[0]
+        x2 = x1 + (row[0] if len(row) else mm(25))
+        x2 = min(x2, x1 + mm(rng.uniform(16, 30)))
+        if x2 - x1 >= mm(6):
+            cv2.line(m, (x1, y), (x2, y), 255, mm(WALL_W * 1.2))
     return m
 
 
@@ -275,7 +280,6 @@ def main():
     fig = figure_mask(img)
     outer = disc(R - 1)
     inner = disc(R - mm(RIM_W))
-    fig &= cv2.erode(inner, k(mm(4)))  # figure stays clear of the rim except where it runs off-edge
 
     walls, regions = art_lines(img, fig)
     raised = walls | speed_lines(fig)

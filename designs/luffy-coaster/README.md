@@ -1,7 +1,8 @@
 # Luffy diamond-art coaster
 
 Straw-hat Luffy coaster in the same style as the Gear 5 One Piece coaster
-(100 mm disc, raised rim, raised art, speed lines). The art is outlines only,
+(100 mm disc, raised rim, figure running off into the rim, speed lines on
+the left). The art is outlines only,
 so the recessed pockets can take diamond-art drills.
 
 | | |
@@ -25,7 +26,7 @@ thin layer of glue or double-sided tape, with the walls sitting flush.
 - `preview_3d.png`: what the print looks like
 - `preview_colour_guide.png`: suggested drill colour for each pocket
   (sky blue, straw yellow, skin, black hair, white teeth, red shirt,
-  yellow button)
+  yellow buttons)
 - `preview_mask.png`: top-down outline mask (black = raised)
 
 ## Regenerating
