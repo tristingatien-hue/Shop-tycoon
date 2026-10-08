@@ -6,3 +6,4 @@ dist/
 /data/
 *.db
 secrets.key
+__pycache__/
